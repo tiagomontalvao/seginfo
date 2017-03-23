@@ -1,8 +1,17 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <vector>
+#include <openssl/sha.h>
 using namespace std;
 
-const string password = "tiago";
+#define MAXSIZE 256
+
+int len;
+unsigned char password[] = "tiago";
+char pswdHash[MAXSIZE];
+unsigned char hash[MAXSIZE];
 
 struct Settings {
     int fixedSize;
@@ -11,24 +20,31 @@ struct Settings {
     Settings() : maxSize(8) {}
 };
 
+string getInput(const string& msg);
 Settings getOptions(void);
+int strequals(const unsigned char* a, const char* b);
+void bruteForce(Settings& settings, int idx);
 void generatePasswords(Settings& opt);
-void bruteForce(Settings& settings, int idx, string& partialString);
 
 int main() {
+    SHA1(password, sizeof(password)-1, pswdHash);
     Settings opt = getOptions();
     generatePasswords(opt);
     return 0;
 }
 
-Settings getOptions() {
-    Settings ret;
+string getInput(const string& msg) {
     string input;
     do {
-        cout << "Fixed size? [y/n]: ";
+        cout << msg;
         cin >> input;
-    } while (input != "y" and input != "n");
-    if (input == "n")
+    } while (input != "y" and input != "n");    
+    return input;
+}
+
+Settings getOptions() {
+    Settings ret;
+    if (getInput("Fixed size? [y/n]: ") == "n")
         ret.fixedSize = -1;
     if (ret.fixedSize != -1) {
         do {
@@ -37,54 +53,54 @@ Settings getOptions() {
         } while (ret.fixedSize < 0);
         ret.maxSize = ret.fixedSize;
     }
-    do {
-        cout << "Small letters? [y/n]: ";
-        cin >> input;
-    } while (input != "y" and input != "n");
-    if (input == "y") {
+    if (getInput("Small letters? [y/n]: ") == "y")
         for (int ch = 'a'; ch <= 'z'; ch++)
             ret.alphabet.push_back(ch);
-    }
-    do {
-        cout << "Capital letters? [y/n]: ";
-        cin >> input;
-    } while (input != "y" and input != "n");
-    if (input == "y") {
+    if (getInput("Capital letters? [y/n]: ") == "y")
         for (int ch = 'A'; ch <= 'Z'; ch++)
             ret.alphabet.push_back(ch);
-    }
-    do {
-        cout << "Numbers? [y/n]: ";
-        cin >> input;
-    } while (input != "y" and input != "n");
-    if (input == "y") {
+    if (getInput("Numbers? [y/n]: ") == "y")
         for (int ch = '0'; ch <= '9'; ch++)
             ret.alphabet.push_back(ch);
-    }
     return ret;
 }
 
-void bruteForce(Settings& settings, int idx, string& partialString) {
+unsigned char partialString[MAXSIZE];
+
+int strequals(const unsigned char* a, const char* b) {
+    while (*a and *b) {
+        if (*a != *b) return 0;
+        a++, b++;
+    }
+    return !(*a) and !(*b); 
+}
+
+void generatePasswords(Settings& settings) {
+    bruteForce(settings, 0);
+    cout << "Password not found" << endl;
+}
+
+void bruteForce(Settings& settings, int idx) {
     if (idx == settings.fixedSize or idx == settings.maxSize) {
-        if (partialString == password) {
+        partialString[idx] = 0;
+        SHA1(partialString, idx, hash);
+        if (strequals(hash, pswdHash)) {
             cout << "Password cracked: " << partialString << endl;
             exit(0);
         }
         return;
     } else if (settings.fixedSize == -1) {
-        if (partialString == password) {
+        SHA1(partialString, idx, hash);
+        if (strequals(hash, pswdHash)) {
+            partialString[idx] = 0;
             cout << "Password cracked: " << partialString << endl;
             exit(0);
         }
     }
     for (int i = 0; i < (int)settings.alphabet.size(); i++) {
-        partialString.push_back(settings.alphabet[i]);
-        bruteForce(settings, idx+1, partialString);
-        partialString.pop_back();
+        partialString[idx] = settings.alphabet[i];
+        // if (partialString[idx] == password[idx]) cout << password[idx] << endl;
+        bruteForce(settings, idx+1);
     }
 }
 
-void generatePasswords(Settings& settings) {
-    string partialString = "";
-    bruteForce(settings, 0, partialString);
-}
