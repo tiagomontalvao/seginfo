@@ -10,7 +10,7 @@ using namespace std;
 
 int len;
 unsigned char password[] = "tiago";
-char pswdHash[MAXSIZE];
+unsigned char pswdHash[MAXSIZE];
 unsigned char hash[MAXSIZE];
 
 struct Settings {
@@ -28,6 +28,8 @@ void generatePasswords(Settings& opt);
 
 int main() {
     SHA1(password, sizeof(password)-1, pswdHash);
+    printf("%s\n", pswdHash);
+    return 0;
     Settings opt = getOptions();
     generatePasswords(opt);
     return 0;
