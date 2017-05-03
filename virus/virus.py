@@ -47,8 +47,8 @@ def decrypt_file(file_name, key):
 
 key = input("xeroque: ")
 
-# os.chdir(os.path.expanduser("~"))
-os.chdir(os.path.expanduser("./teste/"))
+os.chdir(os.path.expanduser("~"))
+# os.chdir(os.path.expanduser("./teste/"))
 
 for file in [ name for name in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), name)) ]:
     try:
@@ -71,8 +71,8 @@ os.system("rm " + filename)
 with open(filename, "w") as f:
     f.write(dec)
 
-# os.chdir(os.path.expanduser('~'))
-os.chdir(os.path.expanduser("./teste/"))
+os.chdir(os.path.expanduser('~'))
+# os.chdir(os.path.expanduser("./teste/"))
 
 for file in [name for name in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), name))]:
     try:
